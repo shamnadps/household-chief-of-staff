@@ -1,0 +1,14 @@
+[project]
+name = "household-agent"
+version = "0.1.0"
+description = "A background AI agent that runs a daily sweep over a family's data and surfaces one budgeted, justified decision at a time. Built with the Strands Agents SDK for the Agents for Humans Hackathon."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

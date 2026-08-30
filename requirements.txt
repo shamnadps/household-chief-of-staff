@@ -1,0 +1,21 @@
+# Core agent framework
+strands-agents>=1.0.0
+strands-agents-tools>=0.1.0
+
+# Bedrock AgentCore — Runtime host + Memory session manager
+bedrock-agentcore[strands-agents]>=0.1.0
+
+# AWS
+boto3>=1.35.0
+
+# HTTP service (local dev of the approve/reject/admin API; Lambda uses the same app)
+fastapi>=0.115.0
+uvicorn>=0.30.0
+mangum>=0.17.0            # ASGI -> AWS Lambda adapter
+
+# Data
+pydantic>=2.7.0
+requests>=2.32.0
+
+# Dev / test
+pytest>=8.0.0
