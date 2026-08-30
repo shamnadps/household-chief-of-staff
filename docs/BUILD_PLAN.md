@@ -126,7 +126,7 @@
 - [x] `pytest` green — 19 passed, hermetic
 - [x] `sam validate --lint` — **valid** (fixed: ApiFunction↔HttpApi circular dep via `BaseUrl` param two-step deploy; `SerpApiKeyValue` default `"none"`)
 - [x] all 24 runtime modules import under `.venv`
-- [x] `git init` + first commit on `main` (51 files; no Claude co-author trailer per user pref)
+- [x] `git init` + history built as 12 logical conventional commits on `main` (scaffold → data → triggers/guardrail → agents → orchestrator → sweep/runtime → api → infra → scripts → tests → docs)
 - [ ] **push to public GitHub** — needs user (repo create + `git remote add` + `git push`); set About description, confirm Apache-2.0 shows, add topics (`strands-agents`, `amazon-bedrock`, `agentcore`, `ai-agent`)
 - [ ] **deploy to AWS** — needs user (Bedrock model access, SES verify, `sam deploy` two-step, `agentcore launch`)
 - [ ] re-check §2 — see updated statuses below
@@ -158,4 +158,8 @@
   - C: `infra/template.yaml` (SAM — DynamoDB, HttpApi+ApiFunction, SweepFunction+ScheduleV2, Secrets Manager, scoped IAM, outputs); `src/requirements.txt`; `scheduled.py`; `infra/agentcore/` (Dockerfile arm64 + requirements + README).
   - D: `scripts/seed_data.py`, `create_memory.py`, `demo_reset.py`, `local_sweep.py`; `table.put_*` + `delete_by_prefix` helpers.
   - E: `tests/` — 19 passing, hermetic (fake table module). `.venv` built with full requirements; all 24 modules import OK.
-  - Next: Phase F (README, ARCHITECTURE, diagram, TESTING) then G (build journal) then H (verification + git push).
+- 2026-08-30 — Phases F, G, H (local) complete.
+  - F: `README.md`, `docs/ARCHITECTURE.md`, `docs/TESTING.md`, `docs/architecture.svg`.
+  - G: `docs/BUILD_JOURNAL.md` drafted (builder.aws.com bonus post).
+  - H: `py_compile` + `pytest` (19) green; `sam validate --lint` valid after fixing a circular ApiFunction↔HttpApi dep (`BaseUrl` param, two-step deploy) and an empty-secret lint (`SerpApiKeyValue` default `none`). Git history rebuilt as 12 logical commits.
+  - Remaining (user): push to public GitHub; deploy (Bedrock model access, SES verify, `sam deploy` x2, `agentcore launch`); demo video; Devpost form + AWS Builder ID; publish the build journal.
