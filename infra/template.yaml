@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Household Chief of Staff — a background agent (Strands Agents SDK + Amazon
+  Bedrock Nova Pro) that runs a daily sweep over a family's data and surfaces
+  one budgeted, justified decision at a time.
+
+  This stack deploys the deterministic sweep as a scheduled Lambda and the
+  human-facing approve/reject/admin surface as a Lambda behind an HTTP API.
+  The interactive "ask the chief of staff" path runs on Bedrock AgentCore
+  Runtime — deployed separately, see infra/agentcore/.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    MemorySize: 512
+    Timeout: 120
+    Architectures: [arm64]
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref Table
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        CURRENCY: !Ref Currency
+        SES_SENDER: !Ref SesSenderAddress
+        APPROVAL_RECIPIENT: !Ref ApprovalRecipient
+        AGENTCORE_MEMORY_ID: !Ref AgentCoreMemoryId
+        ADMIN_USERNAME: !Ref AdminUsername
+        ADMIN_PASSWORD: !Sub "{{resolve:secretsmanager:${AdminPasswordSecret}}}"
+        SWEEP_SECRET: !Sub "{{resolve:secretsmanager:${SweepSecret}}}"
+        SERPAPI_API_KEY: !Sub "{{resolve:secretsmanager:${SerpApiKeySecret}}}"
+        # Set on the SECOND deploy: copy the ApiBaseUrl output and pass
+        # --parameter-overrides BaseUrl=<that-url>. Left empty, the Approve/
+        # Reject links in emails are relative and won't resolve.
+        BASE_URL: !Ref BaseUrl
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: us.amazon.nova-pro-v1:0
+    Description: Bedrock model (inference profile) for the category reasoning agents.
+  Currency:
+    Type: String
+    Default: GBP
+  SesSenderAddress:
+    Type: String
+    Description: A verified SES sender identity (email address or domain sender).
+  ApprovalRecipient:
+    Type: String
+    Description: Where approval-request emails are sent (verified in SES sandbox).
+  BaseUrl:
+    Type: String
+    Default: ""
+    Description: >
+      Public base URL of this stack's HTTP API, used to build Approve/Reject
+      links in the email. Only knowable after the first deploy: deploy once,
+      read the ApiBaseUrl output, then redeploy with BaseUrl set to it.
+  AgentCoreMemoryId:
+    Type: String
+    Default: ""
+    Description: Bedrock AgentCore Memory id (create with scripts/create_memory.py). Optional.
+  AdminUsername:
+    Type: String
+    Default: admin
+  AdminPasswordValue:
+    Type: String
+    NoEcho: true
+    Description: Password for GET /admin (HTTP Basic Auth). Stored in Secrets Manager.
+  SweepSecretValue:
+    Type: String
+    NoEcho: true
+    Description: Shared secret gating POST /sweep. Stored in Secrets Manager.
+  SerpApiKeyValue:
+    Type: String
+    NoEcho: true
+    Default: "none"
+    Description: >
+      SerpAPI key for live flight/shopping prices. Stored in Secrets Manager.
+      Leave as "none" to deploy without the travel category's live pricing.
+  SweepSchedule:
+    Type: String
+    Default: "cron(0 7 * * ? *)"
+    Description: EventBridge Scheduler expression for the daily sweep (UTC).
+
+Resources:
+
+  # ---------------------------------------------------------------- data
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: HouseholdAgent
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # ------------------------------------------------------------- secrets
+  AdminPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: household-agent/admin-password
+      SecretString: !Ref AdminPasswordValue
+  SweepSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: household-agent/sweep-secret
+      SecretString: !Ref SweepSecretValue
+  SerpApiKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: household-agent/serpapi-key
+      SecretString: !Ref SerpApiKeyValue
+
+  # --------------------------------------------------------- HTTP surface
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: household-agent-api
+      CodeUri: ../src/
+      Handler: household_agent.api.handler.handler
+      Description: FastAPI (via Mangum) — /approve /reject /admin /sweep
+      Events:
+        Any:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /{proxy+}
+            Method: ANY
+        Root:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /
+            Method: ANY
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+        - Statement:
+            - Sid: BedrockInvoke
+              Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream]
+              Resource:
+                - arn:aws:bedrock:*::foundation-model/amazon.nova-*
+                - !Sub arn:aws:bedrock:*:${AWS::AccountId}:inference-profile/*
+            - Sid: SesSend
+              Effect: Allow
+              Action: [ses:SendEmail, ses:SendRawEmail]
+              Resource: "*"
+            - Sid: ReadSecrets
+              Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource:
+                - !Ref AdminPasswordSecret
+                - !Ref SweepSecret
+                - !Ref SerpApiKeySecret
+
+  # ------------------------------------------------- scheduled background sweep
+  SweepFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: household-agent-sweep
+      CodeUri: ../src/
+      Handler: household_agent.scheduled.handler
+      Description: Daily deterministic sweep (trigger -> Strands agent -> guardrail -> DynamoDB -> SES)
+      Timeout: 300
+      Events:
+        Daily:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: !Ref SweepSchedule
+            Description: Household Chief of Staff daily sweep
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+        - Statement:
+            - Sid: BedrockInvoke
+              Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream]
+              Resource:
+                - arn:aws:bedrock:*::foundation-model/amazon.nova-*
+                - !Sub arn:aws:bedrock:*:${AWS::AccountId}:inference-profile/*
+            - Sid: SesSend
+              Effect: Allow
+              Action: [ses:SendEmail, ses:SendRawEmail]
+              Resource: "*"
+            - Sid: ReadSecrets
+              Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource:
+                - !Ref SweepSecret
+                - !Ref SerpApiKeySecret
+
+Outputs:
+  ApiBaseUrl:
+    Description: Base URL of the HTTP API (also the BASE_URL used in email links).
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  AdminUrl:
+    Description: Admin dashboard (HTTP Basic Auth).
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/prod/admin"
+  TableName:
+    Value: !Ref Table
+  SweepFunctionName:
+    Description: Invoke manually with `aws lambda invoke` to run a sweep now.
+    Value: !Ref SweepFunction
