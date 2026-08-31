@@ -194,7 +194,7 @@ Open `AdminUrl` (HTTP Basic Auth: `admin` / your `AdminPasswordValue`).
 ### Deploy the AgentCore Runtime (interactive "ask" path + optional sweep host)
 
 See **[`infra/agentcore/README.md`](infra/agentcore/README.md)** —
-`create_memory.py`, then `agentcore configure` / `agentcore launch` / `agentcore
+`create_memory.py`, then `agentcore configure` / `agentcore deploy` / `agentcore
 invoke`.
 
 ---

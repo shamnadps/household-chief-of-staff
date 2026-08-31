@@ -23,12 +23,17 @@ sweep itself — runs on **Bedrock AgentCore Runtime**, hosting
 
 - AWS account with **Bedrock model access** enabled for `amazon.nova-lite-v1:0`
   (and the `us.` cross-region inference profile) in your region.
-- Docker (buildx, `linux/arm64`).
-- `pip install bedrock-agentcore-starter-toolkit` (provides the `agentcore` CLI).
-- An IAM execution role for the runtime with: `bedrock:InvokeModel*`,
-  DynamoDB CRUD on the `HouseholdAgent` table, `ses:SendEmail`,
-  `bedrock-agentcore:*` for Memory, and `secretsmanager:GetSecretValue` for the
-  SerpAPI key secret.
+- The **AgentCore CLI**: `npm install -g @aws/agentcore`
+  (the older `pip install bedrock-agentcore-starter-toolkit` is deprecated and
+  its `agentcore` CLI prints a deprecation notice).
+- **No Docker needed** — the default `agentcore deploy` builds the ARM64
+  container in the cloud with CodeBuild. (`--local-build` / `--local` need
+  Docker/Finch/Podman.)
+- IAM permissions to let the CLI create the execution role, CodeBuild project,
+  and ECR repo it needs, plus `bedrock-agentcore:*`. The runtime's execution
+  role needs: `bedrock:InvokeModel*`, DynamoDB CRUD on the `HouseholdAgent`
+  table, `ses:SendEmail`, `bedrock-agentcore:*` (Memory), and
+  `secretsmanager:GetSecretValue` for the SerpAPI secret.
 
 ## One-time: create the Memory resource
 
@@ -36,17 +41,17 @@ sweep itself — runs on **Bedrock AgentCore Runtime**, hosting
 python scripts/create_memory.py          # prints AGENTCORE_MEMORY_ID
 ```
 
-## Configure + deploy
+## Configure + deploy (cloud build, no Docker)
 
 ```bash
 # from the repo root
 agentcore configure \
   --entrypoint src/household_agent/runtime.py \
   --name household-chief-of-staff \
-  --container-file infra/agentcore/Dockerfile \
-  --region us-west-2
+  --requirements-file infra/agentcore/requirements.txt \
+  --region us-east-1
 
-agentcore launch \
+agentcore deploy \
   --env TABLE_NAME=HouseholdAgent \
   --env BEDROCK_MODEL_ID=us.amazon.nova-lite-v1:0 \
   --env CURRENCY=GBP \
@@ -57,8 +62,10 @@ agentcore launch \
   --env SERPAPI_API_KEY=<key>
 ```
 
-`agentcore launch` builds the container, pushes it to ECR, creates the
-AgentCore Runtime, and returns its ARN.
+`agentcore deploy` (formerly `agentcore launch --code-build`) builds the
+container in CodeBuild, pushes it to ECR, creates the AgentCore Runtime, and
+returns its ARN. The hand-written `infra/agentcore/Dockerfile` is kept for
+reference and for `agentcore deploy --local-build`.
 
 ## Invoke
 
