@@ -38,18 +38,18 @@
 | New AI agent built with **Strands Agents SDK** | `agents/*`, `sweep.py`, `orchestrator.py` | [x] |
 | Handles routine/repetitive tasks **in the background** | daily sweep via EventBridge → AgentCore Runtime | [x] |
 | **Surfaces only when there's a real decision** | SES approval email + admin dashboard; nothing auto-approved | [x] |
-| Track selected (Everyday Agents) | submission form + README | [ ] |
-| **AgentCore** deployment (strengthens Technical Impl.) | `runtime.py`, `infra/template.yaml` | [~] |
-| Text description (what/who/how) | README + Devpost description | [ ] |
-| **Public** code repo URL | GitHub (create + push) | [ ] |
-| All source, assets, setup instructions to run | repo + README "Setup" | [~] |
-| **MIT/Apache license visible in repo About** | `LICENSE` (Apache-2.0) + GitHub About | [~] |
-| README | `README.md` | [ ] |
-| **Architecture Diagram** | `docs/architecture.svg` + embedded in README | [ ] |
-| Demo video ≤ 5 min (working demo + problem/who/why) | recorded separately | [ ] |
-| AWS Builder ID | submission form | [ ] |
-| (Optional) Live demo link | API Gateway URL of `/admin` + AgentCore | [ ] |
-| Bonus: `builder.aws.com` post, "Agents for Humans" in title | `docs/BUILD_JOURNAL.md` → publish | [ ] |
+| Track selected (Everyday Agents) | submission form + README/SUBMISSION.md | [ ] user — on the form |
+| **AgentCore** deployment (strengthens Technical Impl.) | `runtime.py`, `infra/agentcore/` | [~] code done; deploy blocked (no Docker → use `--codebuild`) |
+| Text description (what/who/how) | `docs/SUBMISSION.md` (ready to paste) | [x] |
+| **Public** code repo URL | https://github.com/shamnadps/household-chief-of-staff | [x] |
+| All source, assets, setup instructions to run | repo + README "Setup" | [x] |
+| **MIT/Apache license visible in repo About** | `LICENSE` Apache-2.0 — GitHub detects `Apache-2.0` (verified via API) | [x] |
+| README | `README.md` | [x] |
+| **Architecture Diagram** | `docs/architecture.svg`, embedded in README | [x] |
+| Demo video ≤ 5 min (working demo + problem/who/why) | `docs/VIDEO_SCRIPT.md` written; recording is user's | [~] script done |
+| AWS Builder ID | submission form | [ ] user |
+| (Optional) Live demo link | API Gateway `/admin` + AgentCore | [ ] blocked on deploy (see §4 blockers) |
+| Bonus: `builder.aws.com` post, "Agents for Humans" in title | `docs/BUILD_JOURNAL.md` → publish | [~] draft done; user to publish |
 
 ---
 
@@ -125,11 +125,18 @@
 - [x] `py_compile` all (src + scripts + tests) — OK
 - [x] `pytest` green — 19 passed, hermetic
 - [x] `sam validate --lint` — **valid** (fixed: ApiFunction↔HttpApi circular dep via `BaseUrl` param two-step deploy; `SerpApiKeyValue` default `"none"`)
-- [x] all 24 runtime modules import under `.venv`
-- [x] `git init` + history built as 12 logical conventional commits on `main` (scaffold → data → triggers/guardrail → agents → orchestrator → sweep/runtime → api → infra → scripts → tests → docs)
-- [ ] **push to public GitHub** — needs user (repo create + `git remote add` + `git push`); set About description, confirm Apache-2.0 shows, add topics (`strands-agents`, `amazon-bedrock`, `agentcore`, `ai-agent`)
-- [ ] **deploy to AWS** — needs user (Bedrock model access, SES verify, `sam deploy` two-step, `agentcore launch`)
-- [ ] re-check §2 — see updated statuses below
+- [x] all runtime modules import under `.venv`
+- [x] git history as logical conventional commits on `main` (no Claude attribution)
+- [x] **pushed to public GitHub** — https://github.com/shamnadps/household-chief-of-staff ; topics set; GitHub detects Apache-2.0
+- [x] **`sam build` works with no Docker** — `src/Makefile` pins `manylinux2014_aarch64` / cp312; trimmed `src/requirements.txt` (dropped strands-agents-tools, uvicorn, boto3) → bundle 241 MB → **92 MB**, under the 250 MB limit
+- [x] `sweep.py` — SES send made non-fatal (a sweep still completes + logs if SES is unverified)
+- [ ] **deploy to AWS** — BLOCKED, see §4:
+      - Bedrock: account grants **Nova Lite/Micro only**, not Nova Pro → need model switch or access grant
+      - No **CloudFormation** permission on the IAM user → `sam deploy` needs a policy attached
+      - No Docker → **AgentCore** needs `agentcore launch --codebuild`
+      - SES identities need user email-link verification
+- [ ] demo video — script in `docs/VIDEO_SCRIPT.md`; recording is user's
+- [ ] Devpost form: track (Everyday Agents) + AWS Builder ID — user's
 
 ---
 
@@ -139,7 +146,7 @@
 - **Local Python:** 3.14 on this machine; target runtime Python 3.11+ (Lambda/AgentCore).
 - **DynamoDB keys:** `PK = FAMILY#demo-family`, `SK` prefixes `MEMBER# BUDGET# EVENT# GROCERY# WISHLIST# TXN# SWEEP#`. Numbers stored as `Decimal` (helpers in `data/table.py`).
 - **Currency:** GBP (London demo family), configurable via `CURRENCY`.
-- **Model id:** `us.amazon.nova-pro-v1:0` (inference profile). Override via `BEDROCK_MODEL_ID`.
+- **Model id:** default `us.amazon.nova-pro-v1:0`, override via `BEDROCK_MODEL_ID`. **AWS account `495599778048` only grants Nova Lite/Micro** (group policy `muse-bedrock-inference-profile`) — for this account set `BEDROCK_MODEL_ID=us.amazon.nova-lite-v1:0` or grant Nova Pro access. SUBMISSION.md deliberately says "Amazon Nova family" not "Pro".
 - **AgentCore Runtime payload contract:** `{"action":"sweep"}` (EventBridge) / `{"action":"ask","prompt":"...","session_id":"..."}` (interactive).
 - **Deterministic-skeleton thesis (carry into README/journal):** triggers decide *whether*, guardrail decides *affordable*, model only decides *what to say*. This is the trust story and maps to "Architectural Discipline".
 - **Two Strands surfaces:** (1) per-category structured-output agents inside the deterministic sweep; (2) agents-as-tools orchestrator for interactive Q&A over AgentCore Runtime + Memory.
@@ -161,5 +168,11 @@
 - 2026-08-30 — Phases F, G, H (local) complete.
   - F: `README.md`, `docs/ARCHITECTURE.md`, `docs/TESTING.md`, `docs/architecture.svg`.
   - G: `docs/BUILD_JOURNAL.md` drafted (builder.aws.com bonus post).
-  - H: `py_compile` + `pytest` (19) green; `sam validate --lint` valid after fixing a circular ApiFunction↔HttpApi dep (`BaseUrl` param, two-step deploy) and an empty-secret lint (`SerpApiKeyValue` default `none`). Git history rebuilt as 12 logical commits.
-  - Remaining (user): push to public GitHub; deploy (Bedrock model access, SES verify, `sam deploy` x2, `agentcore launch`); demo video; Devpost form + AWS Builder ID; publish the build journal.
+  - H: `py_compile` + `pytest` (19) green; `sam validate --lint` valid after fixing a circular ApiFunction↔HttpApi dep (`BaseUrl` param, two-step deploy) and an empty-secret lint (`SerpApiKeyValue` default `none`). Git history built as logical commits.
+- 2026-08-31 — "complete what I can" pass.
+  - Pushed to public GitHub (`shamnadps/household-chief-of-staff`); topics + Apache-2.0 detection confirmed.
+  - `sweep.py`: SES send made non-fatal.
+  - `src/Makefile` + `Metadata: BuildMethod: makefile` on both functions → `sam build` works with **no Docker** (Linux arm64 wheels). Trimmed `src/requirements.txt` → 92 MB bundle.
+  - `docs/SUBMISSION.md` (Devpost-ready text) and `docs/VIDEO_SCRIPT.md` (≤5 min script) written.
+  - Probed AWS account: found deploy blockers (no CloudFormation perm; Nova Pro not granted, only Lite/Micro; no Docker for AgentCore; SES unverified). Documented in §2/§4.
+  - Remaining (user): unblock + `sam deploy`; record video; Devpost form + AWS Builder ID; publish build journal.
