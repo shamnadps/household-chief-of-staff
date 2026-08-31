@@ -18,7 +18,7 @@
   </defs>
 
   <text x="30" y="34" font-size="17" font-weight="800" fill="#1b1f24">Household Chief of Staff — architecture</text>
-  <text x="30" y="52" class="sub">Strands Agents SDK · Amazon Bedrock (Nova Pro) · AgentCore · serverless AWS</text>
+  <text x="30" y="52" class="sub">Strands Agents SDK · Amazon Bedrock (Nova Lite) · AgentCore · serverless AWS</text>
 
   <!-- Trigger -->
   <rect class="box aws" x="30" y="80" width="170" height="58" rx="10"/>
@@ -35,7 +35,7 @@
 
   <rect class="box model" x="60" y="290" width="180" height="52" rx="10"/>
   <text x="150" y="312" text-anchor="middle" class="lbl">Strands agent</text>
-  <text x="150" y="328" text-anchor="middle" class="sub">Bedrock · Nova Pro</text>
+  <text x="150" y="328" text-anchor="middle" class="sub">Bedrock · Nova Lite</text>
 
   <rect class="box det" x="60" y="370" width="180" height="52" rx="10"/>
   <text x="150" y="392" text-anchor="middle" class="lbl">guardrail.py</text>

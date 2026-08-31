@@ -21,7 +21,7 @@ sweep itself — runs on **Bedrock AgentCore Runtime**, hosting
 
 ## Prerequisites
 
-- AWS account with **Bedrock model access** enabled for `amazon.nova-pro-v1:0`
+- AWS account with **Bedrock model access** enabled for `amazon.nova-lite-v1:0`
   (and the `us.` cross-region inference profile) in your region.
 - Docker (buildx, `linux/arm64`).
 - `pip install bedrock-agentcore-starter-toolkit` (provides the `agentcore` CLI).
@@ -48,7 +48,7 @@ agentcore configure \
 
 agentcore launch \
   --env TABLE_NAME=HouseholdAgent \
-  --env BEDROCK_MODEL_ID=us.amazon.nova-pro-v1:0 \
+  --env BEDROCK_MODEL_ID=us.amazon.nova-lite-v1:0 \
   --env CURRENCY=GBP \
   --env AGENTCORE_MEMORY_ID=<from create_memory.py> \
   --env SES_SENDER=<verified-sender> \

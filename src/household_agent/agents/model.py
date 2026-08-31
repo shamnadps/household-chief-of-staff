@@ -1,4 +1,4 @@
-"""Shared Bedrock model factory. One place to swap Amazon Nova Pro for another
+"""Shared Bedrock model factory. One place to swap Amazon Nova Lite for another
 model or region.
 """
 

@@ -6,7 +6,7 @@
 
 A scheduled job ("the sweep") runs once a day. For each of four categories it
 asks a plain-Python rule whether anything qualifies; if so, a Strands agent
-backed by Amazon Bedrock (Nova Pro) writes a proposal and a justification
+backed by Amazon Bedrock (Nova Lite) writes a proposal and a justification
 grounded in the family's real data; a plain-Python guardrail checks the amount
 against that category's remaining monthly budget; the proposal is written to
 DynamoDB and emailed via SES with Approve / Reject links. Clicking a link hits
@@ -24,7 +24,7 @@ about what the agent did, using AgentCore Memory for continuity.
 | Sweep pipeline | `sweep.py` | orchestrate trigger → agent → guardrail → persist → notify, deterministically |
 | Trigger rules | `triggers.py` | decide whether a category has a candidate — *before* any model call |
 | Category agents | `agents/{wardrobe,gifts,groceries,travel}.py` | one Strands `Agent` each; `structured_output(ProposalBatch)` |
-| Model factory | `agents/model.py` | `BedrockModel(model_id="us.amazon.nova-pro-v1:0", temperature=0.3)` |
+| Model factory | `agents/model.py` | `BedrockModel(model_id="us.amazon.nova-lite-v1:0", temperature=0.3)` |
 | Guardrail | `guardrail.py` | `within_limit` vs `needs_override` against the live budget — *after* the model |
 | Persistence | `data/table.py` | the only module that talks to DynamoDB |
 | Notification | `notify.py` | Amazon SES `send_email` — the one real external action |

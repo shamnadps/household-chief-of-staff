@@ -28,7 +28,7 @@ model's justification *text* varies run to run; the decisions around it do not.
 
 ### One-time
 
-1. Enable Bedrock model access for `amazon.nova-pro-v1:0` in your region.
+1. Enable Bedrock model access for `amazon.nova-lite-v1:0` in your region.
 2. Verify an SES sender address (and a recipient, if your account is in the SES
    sandbox).
 3. `sam build --template infra/template.yaml && sam deploy --guided …`

@@ -40,7 +40,7 @@ background tax on attention. This agent carries that list.
 EventBridge Scheduler (daily)
   └─> Sweep  (AWS Lambda, or Bedrock AgentCore Runtime)
         ├─ triggers.py        does any category even have a candidate?      [plain Python]
-        ├─ Strands agent      what should we propose, and why?             [Amazon Nova Pro]
+        ├─ Strands agent      what should we propose, and why?             [Amazon Nova Lite]
         ├─ guardrail.py       is it within the category budget?            [plain Python]
         ├─ DynamoDB           write the proposal as a Transaction
         └─ Amazon SES         email the family: Approve / Reject
@@ -79,7 +79,7 @@ data, produce a proposal and a justification grounded in the actual numbers.
 
 | Service | Role |
 |---|---|
-| **Amazon Bedrock** (Nova Pro, `us.amazon.nova-pro-v1:0`) | reasoning + justification for each category |
+| **Amazon Bedrock** (Nova Lite, `us.amazon.nova-lite-v1:0`) | reasoning + justification for each category |
 | **Bedrock AgentCore Runtime** | hosts the agent for async background execution + interactive Q&A |
 | **Bedrock AgentCore Memory** | cross-sweep context for the "ask" path |
 | **AWS Lambda** | scheduled sweep; FastAPI approve/reject/admin surface (via Mangum) |
@@ -114,7 +114,7 @@ src/household_agent/
     table.py           the single DynamoDB access point
     price_service.py   SerpAPI wrapper
   agents/
-    model.py           BedrockModel factory (Nova Pro)
+    model.py           BedrockModel factory (Nova Lite)
     schemas.py         Pydantic ProposalBatch (structured output)
     base.py            build_agent() + propose_batch()
     wardrobe.py gifts.py groceries.py travel.py
@@ -139,7 +139,7 @@ docs/                  ARCHITECTURE.md, TESTING.md, BUILD_PLAN.md, BUILD_JOURNAL
 ### Prerequisites
 
 - Python 3.11+ and the AWS CLI, authenticated (`aws configure`).
-- **Amazon Bedrock model access** enabled for `amazon.nova-pro-v1:0` (and the
+- **Amazon Bedrock model access** enabled for `amazon.nova-lite-v1:0` (and the
   `us.` cross-region inference profile) in your region — request it in the
   Bedrock console → *Model access*.
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html).

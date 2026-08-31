@@ -9,10 +9,10 @@ import os
 
 AWS_REGION = os.environ.get("AWS_REGION", "us-west-2")
 
-# Amazon Nova Pro — the reasoning model behind each category agent. Overridable
+# Amazon Nova Lite — the reasoning model behind each category agent. Overridable
 # so the same code runs against a cheaper/faster model in tests or a different
 # region's inference profile.
-BEDROCK_MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "us.amazon.nova-pro-v1:0")
+BEDROCK_MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "us.amazon.nova-lite-v1:0")
 
 # DynamoDB single-table store.
 TABLE_NAME = os.environ.get("TABLE_NAME", "HouseholdAgent")

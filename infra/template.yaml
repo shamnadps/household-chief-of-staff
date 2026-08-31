@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Household Chief of Staff — a background agent (Strands Agents SDK + Amazon
-  Bedrock Nova Pro) that runs a daily sweep over a family's data and surfaces
+  Bedrock Nova Lite) that runs a daily sweep over a family's data and surfaces
   one budgeted, justified decision at a time.
 
   This stack deploys the deterministic sweep as a scheduled Lambda and the
@@ -36,7 +36,7 @@ Globals:
 Parameters:
   BedrockModelId:
     Type: String
-    Default: us.amazon.nova-pro-v1:0
+    Default: us.amazon.nova-lite-v1:0
     Description: Bedrock model (inference profile) for the category reasoning agents.
   Currency:
     Type: String

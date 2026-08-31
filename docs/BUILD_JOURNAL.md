@@ -30,7 +30,7 @@ A scheduled **sweep** runs once a day:
 EventBridge Scheduler (daily)
   -> Sweep  (Lambda, or Bedrock AgentCore Runtime)
        triggers.py     does any category have a candidate?     [plain Python]
-       Strands agent   what to propose, and why?               [Bedrock Nova Pro]
+       Strands agent   what to propose, and why?               [Bedrock Nova Lite]
        guardrail.py    is it within the category budget?       [plain Python]
        DynamoDB        write the proposal
        Amazon SES      email: Approve / Reject
@@ -82,7 +82,7 @@ reason its way out of.
 
 | Service | Role |
 |---|---|
-| Amazon Bedrock (Nova Pro) | reasoning + justification per category |
+| Amazon Bedrock (Nova Lite) | reasoning + justification per category |
 | Bedrock AgentCore Runtime | hosts the agent for async background work + interactive Q&A |
 | Bedrock AgentCore Memory | cross-sweep context for the "ask" path |
 | AWS Lambda | scheduled sweep; FastAPI approve/reject/admin (via Mangum) |
@@ -93,8 +93,8 @@ reason its way out of.
 | AWS Secrets Manager | admin password, sweep secret, SerpAPI key |
 | AWS SAM / CloudFormation | infrastructure as code |
 
-Amazon Nova Pro was a good fit for the reasoning step: the value here is a
-tight, grounded justification, not prose, and Nova Pro is fast and inexpensive
+Amazon Nova Lite was a good fit for the reasoning step: the value here is a
+tight, grounded justification, not prose, and Nova Lite is fast and inexpensive
 at one sweep a day.
 
 ## What bit me
@@ -115,7 +115,7 @@ at one sweep a day.
 
 ## Try it
 
-Repo: `<GITHUB URL>` (Apache-2.0). `pytest -q` runs 19 tests with no AWS
+Repo: https://github.com/shamnadps/household-chief-of-staff (Apache-2.0). `pytest -q` runs 19 tests with no AWS
 needed; `README.md` has the `sam deploy` and AgentCore steps; `docs/TESTING.md`
 is a reviewer walkthrough.
 
