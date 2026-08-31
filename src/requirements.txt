@@ -1,9 +1,11 @@
-# Runtime dependencies for the Lambda functions (SAM builds from this dir).
-# The AgentCore Runtime container adds bedrock-agentcore on top — see
-# infra/agentcore/requirements.txt.
+# Runtime dependencies for the Lambda functions. SAM builds these into the
+# deployment package via src/Makefile (pinned to Linux arm64 / CPython 3.12).
+#
+# Deliberately minimal to stay well under the 250 MB unzipped Lambda limit:
+#   - no strands-agents-tools: the orchestrator defines its own @tool functions
+#   - no uvicorn/watchdog: local-dev only (see the repo-root requirements.txt)
+#   - no boto3/botocore: provided by the Lambda Python runtime
 strands-agents>=1.0.0
-strands-agents-tools>=0.1.0
-boto3>=1.35.0
 fastapi>=0.115.0
 mangum>=0.17.0
 pydantic>=2.7.0
