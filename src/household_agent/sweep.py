@@ -15,6 +15,7 @@ agents never touch DynamoDB or SES.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import date, datetime, timezone
 
@@ -23,6 +24,8 @@ from household_agent.data import table as repo
 from household_agent.guardrail import check_budget
 from household_agent.models import Category, SweepLogEntry
 from household_agent.notify import send_approval_email
+
+log = logging.getLogger(__name__)
 
 CATEGORY_AGENTS = {
     "wardrobe": wardrobe,
@@ -50,7 +53,13 @@ def run_sweep(today: date | None = None, *, send_email: bool = True) -> SweepLog
                 budget_status=status,
             )
             if send_email:
-                send_approval_email(tx)
+                # A failed send (SES unverified, throttled) must not abort the
+                # sweep — the proposal is already persisted and visible on the
+                # dashboard; the email is a notification, not the source of truth.
+                try:
+                    send_approval_email(tx)
+                except Exception:  # noqa: BLE001
+                    log.exception("SES send failed for transaction %s; continuing", tx.id)
             proposals_created += 1
 
     entry = SweepLogEntry(
