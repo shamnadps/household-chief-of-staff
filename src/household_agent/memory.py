@@ -39,6 +39,8 @@ def session_manager(session_id: str):
     config = AgentCoreMemoryConfig(
         memory_id=AGENTCORE_MEMORY_ID,
         session_id=session_id,
-        actor_id=f"family::{FAMILY_ID}",
+        # AgentCore's actorId pattern rejects an empty segment ("::"), so a
+        # single colon separates the namespace from the family id.
+        actor_id=f"family:{FAMILY_ID}",
     )
     return AgentCoreMemorySessionManager(config, region_name=AWS_REGION)

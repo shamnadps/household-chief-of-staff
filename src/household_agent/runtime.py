@@ -24,7 +24,7 @@ app = BedrockAgentCoreApp()
 
 
 @app.entrypoint
-def invoke(payload: dict) -> dict:
+def invoke(payload: dict, context=None) -> dict:
     action = (payload or {}).get("action", "ask")
 
     if action == "sweep":
@@ -40,8 +40,13 @@ def invoke(payload: dict) -> dict:
         prompt = (payload or {}).get("prompt", "").strip()
         if not prompt:
             return {"error": "payload.prompt is required for action 'ask'"}
-        sid = (payload or {}).get("session_id") or datetime.now(timezone.utc).strftime(
-            "sess-%Y%m%d%H%M%S"
+        # Prefer an explicit payload session_id, then the AgentCore Runtime
+        # session id (set by the caller's Runtime-Session-Id header) so memory
+        # carries across calls in the same session, then a timestamp fallback.
+        sid = (
+            (payload or {}).get("session_id")
+            or getattr(context, "session_id", None)
+            or datetime.now(timezone.utc).strftime("sess-%Y%m%d%H%M%S")
         )
         return {"action": "ask", "session_id": sid, "answer": ask(prompt, session_manager(sid))}
 

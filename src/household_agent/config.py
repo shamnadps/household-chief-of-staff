@@ -23,7 +23,12 @@ CURRENCY = os.environ.get("CURRENCY", "GBP")
 CURRENCY_SYMBOL = {"GBP": "£", "USD": "$", "EUR": "€"}.get(CURRENCY, "")
 
 # Bedrock AgentCore Memory — persistent cross-sweep context for the family.
-AGENTCORE_MEMORY_ID = os.environ.get("AGENTCORE_MEMORY_ID", "")
+# The AgentCore toolkit injects BEDROCK_AGENTCORE_MEMORY_ID when it provisions
+# the Memory resource; accept that too so no manual wiring is needed.
+AGENTCORE_MEMORY_ID = (
+    os.environ.get("AGENTCORE_MEMORY_ID")
+    or os.environ.get("BEDROCK_AGENTCORE_MEMORY_ID", "")
+)
 
 # SES.
 SES_SENDER = os.environ.get("SES_SENDER", "household-agent@example.com")

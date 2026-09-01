@@ -14,3 +14,10 @@ dist/
 build/
 node_modules/
 cdk.out/
+
+# AgentCore starter-toolkit local state (account-specific ARNs, generated
+# Dockerfile with baked env). Reproduce with: agentcore configure + the
+# Dockerfile edits documented in infra/agentcore/README.md
+.bedrock_agentcore/
+.bedrock_agentcore.yaml
+.dockerignore
