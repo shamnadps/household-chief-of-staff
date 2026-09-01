@@ -10,9 +10,10 @@
 
 PLATFORM  := manylinux2014_aarch64
 PYVERSION := 3.12
+PIP       := $(shell command -v pip || echo "python3 -m pip")
 
 define build_function
-	pip install \
+	$(PIP) install \
 		--platform $(PLATFORM) \
 		--implementation cp \
 		--python-version $(PYVERSION) \
