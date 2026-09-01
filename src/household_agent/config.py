@@ -37,8 +37,11 @@ SWEEP_SECRET = os.environ.get("SWEEP_SECRET", "")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
-# External price data.
-SERPAPI_API_KEY = os.environ.get("SERPAPI_API_KEY", "")
+# External price data. "none" is the documented sentinel for "deploy without
+# live pricing" (see infra/template.yaml), so treat it the same as unset.
+_serpapi_raw = os.environ.get("SERPAPI_API_KEY", "")
+SERPAPI_API_KEY = "" if _serpapi_raw.strip().lower() in ("", "none") else _serpapi_raw
+LIVE_PRICING_ENABLED = bool(SERPAPI_API_KEY)
 
 
 def money(amount: float) -> str:

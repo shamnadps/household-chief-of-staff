@@ -8,7 +8,7 @@ from datetime import date
 
 from household_agent.agents.base import build_agent, propose_batch
 from household_agent.agents.schemas import ProposalItem
-from household_agent.config import money
+from household_agent.config import LIVE_PRICING_ENABLED, money
 from household_agent.data import table as repo
 from household_agent.data.price_service import get_flight_price
 from household_agent.models import WishlistItem
@@ -30,6 +30,8 @@ Set ref_id to the wishlist item's id exactly as given."""
 
 
 def _refresh_live_prices() -> None:
+    if not LIVE_PRICING_ENABLED:
+        return  # no SerpAPI key: fall back to the seeded price history
     for item in repo.get_wishlist_items():
         if item.category != "travel" or item.status != "watching":
             continue
