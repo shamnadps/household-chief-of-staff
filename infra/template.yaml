@@ -123,7 +123,10 @@ Resources:
   HttpApi:
     Type: AWS::Serverless::HttpApi
     Properties:
-      StageName: prod
+      # $default serves at the API root with no stage path segment, so the
+      # request path reaching FastAPI is "/healthz" not "/prod/healthz"
+      # (Mangum is not configured to strip a stage prefix).
+      StageName: $default
 
   ApiFunction:
     Type: AWS::Serverless::Function
@@ -210,10 +213,10 @@ Resources:
 Outputs:
   ApiBaseUrl:
     Description: Base URL of the HTTP API (also the BASE_URL used in email links).
-    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
   AdminUrl:
     Description: Admin dashboard (HTTP Basic Auth).
-    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/prod/admin"
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/admin"
   TableName:
     Value: !Ref Table
   SweepFunctionName:
