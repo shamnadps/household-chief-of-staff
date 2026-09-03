@@ -21,3 +21,10 @@ cdk.out/
 .bedrock_agentcore/
 .bedrock_agentcore.yaml
 .dockerignore
+
+# video render outputs (regenerate: cd video/render && python3 build_narration.py && python3 build_video.py)
+video/render/_build/
+video/render/_narr/
+video/render/*.wav
+video/render/*.mp4
+video/render/beat*.txt

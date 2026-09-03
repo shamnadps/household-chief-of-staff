@@ -1,37 +1,52 @@
-# Demo video — narration script
+# Demo video
 
-`beat0.txt` … `beat4.txt` are the spoken narration, one file per beat, plain
-text so macOS `say` reads them cleanly (numbers spelled out, `S E S` spaced so
-it isn't read "sess", `--` for an em-dash pause).
+`beat0.txt` … `beat4.txt` — the spoken narration, one file per beat, plain text
+for macOS `say` (numbers spelled out, `S E S` spaced, `--` = em-dash pause).
 
-Raw `say -v Daniel` timing (measured): beat0 31s · beat1 45s · beat2 105s ·
-beat3 60s · beat4 42s — **≈ 4:43 total**, under the 5-minute limit.
+**`render/`** is the self-contained build: `build_narration.py` (say → per-beat
+WAVs + `narration.srt`), `build_video.py` (holds each still in `frames/beat*/`
+for its narration-synced slice, muxes to `FINAL.mp4` with soft captions),
+`pages/` (title cards + terminal cards, served over http for screenshotting).
 
-## Beat → screen mapping (for frame capture)
+## Rebuild
 
-| Beat | On screen |
+```bash
+cd video/render
+cp ../beat*.txt .
+python3 build_narration.py
+python3 build_video.py        # -> render/FINAL.mp4
+```
+
+Current cut: **4:41**, 1920×1080, H.264 / AAC, soft captions. Under the 5-min cap.
+
+## Frames (narration order)
+
+| Beat | Frames |
 |---|---|
-| 0 | Title card (`video-production/title_open.html`) or the four category icons |
-| 1 | `docs/architecture.svg`; a beat of the AWS console (Bedrock model access / CloudWatch) |
-| 2 | Terminal: `aws lambda invoke --function-name household-agent-sweep …`; then `/admin` dashboard cards — wardrobe (Kai), gifts (hamper), groceries, travel; then DynamoDB `TXN#` items; then the Kai proposal's justification text |
-| 3 | The approval email in the inbox; click Approve → JSON response; back to the dashboard / DynamoDB showing `executed` + the moved budget bar; reject the gift email |
-| 4 | Terminal: `agentcore invoke '{"action":"ask","prompt":"Why did you propose the hamper, and is groceries near its budget?"}'`; the GitHub repo page; `docs/architecture.svg` |
+| 0 | title-open card |
+| 1 | architecture diagram |
+| 2 | `term_sweep` (lambda invoke) · dashboard: wardrobe/Kai · photo-book card · groceries · travel + budget bars · Kai's justification |
+| 3 | Kai card (Approve/Reject) · Kai EXECUTED · dashboard after (gifts "nothing pending", 8 need approval) · COMPLETED + sweep log · budget bars |
+| 4 | `term_ask` (AgentCore Q&A) · GitHub repo · title-close card |
 
-## Numbers to lock during capture
+## TODO — AWS console B-roll (blocked in automation)
 
-Model-generated amounts vary per sweep. Before final narration, run a clean
-sweep (`scripts/demo_reset.py` → `scripts/seed_data.py` → invoke) and confirm /
-adjust in `beat2.txt`:
+The Claude-in-Chrome extension can't navigate to `console.aws.amazon.com`, so
+the "proof it runs on AWS" cutaways aren't captured. Grab 2–3 stills and drop
+them into `render/frames/beat1/` (and/or `beat2/`), then bump the weights in
+`build_video.py::BEATS`:
 
-- Kai wardrobe proposal amount (script says **£60**)
-- Gift hamper amount (script avoids a figure — keep it that way, or insert the real one)
-- Grocery total (script says **£27.20** = milk 4.50 + bread 2.20 + coffee 8.50 + toilet paper 12.00)
-- Zurich / Bali flight figures (script says **£1365 / £2465**; live pricing is off with `SERPAPI_API_KEY=none`, so these come from the seeded seasonal curve and are stable)
-- Kai justification wording — quote the real text off the proposal
+- **DynamoDB** → table `HouseholdAgent` → Explore items (show `TXN#…` rows)
+- **Bedrock** → Model access (Nova Lite enabled) or Usage
+- optional: **Lambda** `household-agent-sweep`, or its CloudWatch log group
 
-## Build
+The real `aws lambda invoke` output and `agentcore invoke` output are already on
+screen (terminal cards) and the dashboard is the live deployed stack, so the
+video stands without these — they'd just strengthen the Technical Implementation
+score.
 
-The assembly pipeline lives in `../../../google-cloud/video-production/`
-(`build_narration.py` → `build_video.py`). Point it at these five files (or copy
-them over its `beat*.txt`), drop the captured stills into `frames/beat*/`, and
-adjust the per-frame weights in `build_video.py::BEATS` to match the new timings.
+## Upload
+
+`render/FINAL.mp4` → YouTube/Vimeo (unlisted is fine) → paste the link into the
+Devpost submission. `say -v Daniel` VO is clear but robotic; re-record over the
+same timings if you want a human voice (`narration.srt` has the cue timings).

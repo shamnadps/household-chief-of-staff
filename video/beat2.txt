@@ -1,11 +1,11 @@
-Here is a sweep running -- one Lambda invoke. It checked all four categories and created nine proposals.
+Here is a sweep running -- one Lambda invoke. It checked all four categories and created ten proposals.
 
-Start with wardrobe. All three children are more than ninety days overdue for a sizing review, so each gets a proposal in their latest measured sizes. Take Kai: his size history is a hundred and ten days stale, so the agent proposes an autumn set in his current sizes, red and dinosaur-themed to match his preferences, at sixty pounds -- inside the hundred and twenty pound budget.
+Start with wardrobe. All three children are more than ninety days overdue for a sizing review, so each gets a proposal in their latest measured sizes and their own preferences. Take Kai: his size history is a hundred and ten days stale, so the agent proposes red dinosaur-themed shoes in E U twenty-seven with a matching top, at fifty pounds -- inside the hundred and twenty pound wardrobe budget.
 
-Then gifts. Elena and Marcus's anniversary is eleven days out, inside the fourteen-day window. The agent checked the gift history first: last year was a ninety-pound spa voucher, so this year it deliberately proposes something different -- a food-and-wine hamper. That is the don't-repeat-a-gift rule actually running.
+Then gifts. Elena and Marcus's anniversary is eleven days out, inside the fourteen-day window. The agent checked the gift history first: last year was a spa voucher, so this year it proposes something different -- a personalized photo book. At a hundred and twenty pounds it sits just over the gifts budget, so it is flagged for an override, not sent as a clean approve.
 
 Then groceries. Four staples are past their reorder cycle -- milk and bread a day over, coffee six days over, toilet paper five -- each reordered from its usual store at its usual price, twenty-seven pounds twenty in total, well inside the groceries budget.
 
-And travel. Round-trip flights for five to Zurich came in at thirteen hundred and sixty-five pounds, to Bali at twenty-four hundred and sixty-five. Both beat their target price -- but both are far over the five hundred pound travel budget, so the guardrail flags them for an override. They are surfaced, not silently dropped.
+And travel. Round-trip flights for five to Zurich came in at thirteen hundred and sixty-five pounds, to Bali at twenty-four hundred and sixty-five. Both beat their target price, but both are far over the five hundred pound travel budget, so they are flagged too -- surfaced, never silently dropped.
 
-Here is Kai's justification, shown on the proposal itself. It cites the exact numbers -- a hundred and ten days since the last review, shoe E U twenty-five to twenty-seven, top a hundred and four to a hundred and sixteen centimetres. Every number comes from the real DynamoDB record, not a template.
+Here is Kai's justification, shown on the proposal itself: he grew from shoe E U twenty-five to twenty-seven over the last hundred and ten days, and the recommendation follows his latest measurement of a hundred and sixteen centimetres. Every number there comes from the real DynamoDB record -- the actual size history, the actual gift history -- not a template.

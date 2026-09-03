@@ -1,0 +1,314 @@
+1
+00:00:00,000 --> 00:00:03,939
+Running a household is a rolling list of small
+decisions that never stops.
+
+2
+00:00:03,939 --> 00:00:05,769
+Have the kids outgrown their shoes?
+
+3
+00:00:05,769 --> 00:00:08,512
+Is a gift sorted for the anniversary in two
+weeks?
+
+4
+00:00:08,512 --> 00:00:10,372
+Did the grocery reorder go out?
+
+5
+00:00:10,372 --> 00:00:17,736
+None of these is hard, but doing them well means
+remembering last year, checking today's prices,
+and staying inside a budget.
+
+6
+00:00:17,736 --> 00:00:21,654
+Household Chief of Staff is a background agent
+that carries that list.
+
+7
+00:00:21,654 --> 00:00:30,131
+Once a day it sweeps the family's data, checks
+every idea against a budget, and emails you one
+decision at a time: approve, or reject.
+
+8
+00:00:30,131 --> 00:00:32,520
+The design decision that matters is trust.
+
+9
+00:00:32,520 --> 00:00:38,468
+If an agent is going to email me spending
+decisions, I need to know it can't talk itself
+into one.
+
+10
+00:00:38,468 --> 00:00:44,911
+So the model never decides whether to act, and
+never decides whether something is affordable —
+both are plain Python.
+
+11
+00:00:44,911 --> 00:00:48,532
+Trigger rules run first; a budget guardrail runs
+last.
+
+12
+00:00:48,532 --> 00:00:55,834
+The Strands agent in between has one job: given
+a qualified candidate and the real data, write
+the proposal and justify it.
+
+13
+00:00:55,834 --> 00:01:01,897
+It runs on AWS — Strands Agents on Amazon
+Bedrock with the Nova model, one agent per
+category
+
+14
+00:01:01,897 --> 00:01:08,407
+a daily EventBridge schedule firing the sweep
+into Lambda, DynamoDB for the data, S E S for
+the email
+
+15
+00:01:08,407 --> 00:01:11,662
+and Bedrock AgentCore for the part you can talk
+to.
+
+16
+00:01:11,662 --> 00:01:13,819
+This is the live stack in us-east-one.
+
+17
+00:01:13,819 --> 00:01:16,622
+Here is a sweep running — one Lambda invoke.
+
+18
+00:01:16,622 --> 00:01:20,073
+It checked all four categories and created ten
+proposals.
+
+19
+00:01:20,073 --> 00:01:21,316
+Start with wardrobe.
+
+20
+00:01:21,316 --> 00:01:25,445
+All three children are more than ninety days
+overdue for a sizing review
+
+21
+00:01:25,445 --> 00:01:30,027
+so each gets a proposal in their latest measured
+sizes and their own preferences.
+
+22
+00:01:30,027 --> 00:01:33,643
+Take Kai: his size history is a hundred and ten
+days stale
+
+23
+00:01:33,643 --> 00:01:39,036
+so the agent proposes red dinosaur-themed shoes
+in E U twenty-seven with a matching top
+
+24
+00:01:39,036 --> 00:01:43,388
+at fifty pounds — inside the hundred and twenty
+pound wardrobe budget.
+
+25
+00:01:43,388 --> 00:01:44,212
+Then gifts.
+
+26
+00:01:44,212 --> 00:01:49,254
+Elena and Marcus's anniversary is eleven days
+out, inside the fourteen-day window.
+
+27
+00:01:49,254 --> 00:01:53,385
+The agent checked the gift history first: last
+year was a spa voucher
+
+28
+00:01:53,385 --> 00:01:57,751
+so this year it proposes something different — a
+personalized photo book.
+
+29
+00:01:57,751 --> 00:02:05,045
+At a hundred and twenty pounds it sits just over
+the gifts budget, so it is flagged for an
+override, not sent as a clean approve.
+
+30
+00:02:05,045 --> 00:02:06,125
+Then groceries.
+
+31
+00:02:06,125 --> 00:02:11,929
+Four staples are past their reorder cycle — milk
+and bread a day over, coffee six days over
+
+32
+00:02:11,929 --> 00:02:18,982
+toilet paper five — each reordered from its
+usual store at its usual price, twenty-seven
+pounds twenty in total
+
+33
+00:02:18,982 --> 00:02:21,041
+well inside the groceries budget.
+
+34
+00:02:21,041 --> 00:02:21,753
+And travel.
+
+35
+00:02:21,753 --> 00:02:29,825
+Round-trip flights for five to Zurich came in at
+thirteen hundred and sixty-five pounds, to Bali
+at twenty-four hundred and sixty-five.
+
+36
+00:02:29,825 --> 00:02:37,926
+Both beat their target price, but both are far
+over the five hundred pound travel budget, so
+they are flagged too — surfaced
+
+37
+00:02:37,926 --> 00:02:39,405
+never silently dropped.
+
+38
+00:02:39,405 --> 00:02:41,082
+Here is Kai's justification
+
+39
+00:02:41,082 --> 00:02:47,969
+shown on the proposal itself: he grew from shoe
+E U twenty-five to twenty-seven over the last
+hundred and ten days
+
+40
+00:02:47,969 --> 00:02:53,418
+and the recommendation follows his latest
+measurement of a hundred and sixteen
+centimetres.
+
+41
+00:02:53,418 --> 00:03:00,701
+Every number there comes from the real DynamoDB
+record — the actual size history, the actual
+gift history — not a template.
+
+42
+00:03:00,701 --> 00:03:08,355
+Every proposal is one email — category,
+proposal, amount, reason, and two links: approve
+or reject.
+
+43
+00:03:08,355 --> 00:03:10,872
+Open Kai's wardrobe email and click approve.
+
+44
+00:03:10,872 --> 00:03:18,633
+That hits API Gateway and a Lambda, which checks
+a per-transaction token, flips the transaction
+to executed in DynamoDB
+
+45
+00:03:18,633 --> 00:03:23,095
+and moves the wardrobe budget counter by exactly
+the approved amount.
+
+46
+00:03:23,095 --> 00:03:26,592
+Nothing was bought — this is a simulated
+execution model.
+
+47
+00:03:26,592 --> 00:03:29,533
+Now reject the photo book instead — one click.
+
+48
+00:03:29,533 --> 00:03:32,996
+It flips to rejected, and the gifts budget stays
+untouched.
+
+49
+00:03:32,996 --> 00:03:39,558
+Every proposal cleared a deterministic budget
+check before it was ever emailed — plain Python,
+not the model.
+
+50
+00:03:39,558 --> 00:03:42,275
+The model proposes; the code enforces.
+
+51
+00:03:42,275 --> 00:03:49,838
+And this is the whole system on one page: the
+approval queue by category, today's activity,
+what is trending toward qualifying next
+
+52
+00:03:49,838 --> 00:03:57,917
+and budget bars where the shaded overlay is what
+is pending — so you can see whether approving
+everything queued would push a category over.
+
+53
+00:03:57,917 --> 00:03:58,814
+One more thing.
+
+54
+00:03:58,814 --> 00:04:05,998
+The interactive path is a Strands agents-as-
+tools orchestrator on Bedrock AgentCore, so I
+can just ask it things.
+
+55
+00:04:05,998 --> 00:04:09,828
+Summarise today's proposals, and flag anything
+over budget.
+
+56
+00:04:09,828 --> 00:04:15,414
+It consults the proposal log and the live
+budgets, and answers in a couple of sentences —
+here
+
+57
+00:04:15,414 --> 00:04:20,361
+calling out travel at thirty-eight hundred
+pounds against a five hundred pound limit.
+
+58
+00:04:20,361 --> 00:04:23,510
+AgentCore Memory keeps that context across runs.
+
+59
+00:04:23,510 --> 00:04:29,803
+That is the loop: deterministic rules on the
+edges, a Strands agent in the middle, one
+decision at a time.
+
+60
+00:04:29,803 --> 00:04:35,205
+It is all on GitHub — Apache-2.0, with a test
+suite that runs with no AWS access.
+
+61
+00:04:35,205 --> 00:04:36,812
+Household Chief of Staff.
+
+62
+00:04:36,812 --> 00:04:41,518
+It watches, it decides, it justifies — and it
+asks first.
+

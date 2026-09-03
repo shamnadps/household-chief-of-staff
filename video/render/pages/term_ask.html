@@ -1,0 +1,24 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_style.css"></head>
+<body class="term">
+  <div class="win">
+    <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="name">bash &mdash; household-agent</span></div>
+    <div class="body"><span class="p">$</span> agentcore invoke <span class="s">'{ "action": "ask", "prompt":
+    "Summarise today&rsquo;s proposals, and flag anything over budget." }'</span>
+
+<span class="d">Response:</span>
+Today&rsquo;s proposals by category, with total amounts:
+
+  <span class="c">Travel</span>      &pound;3,830   <span class="s">&larr; over budget</span>
+  <span class="c">Wardrobe</span>    &pound;180
+  <span class="c">Gifts</span>       &pound;120
+  <span class="c">Groceries</span>   &pound;27.20
+
+The <span class="k">travel</span> category is over its monthly budget &mdash; &pound;3,830
+against a &pound;500 limit. The others are within their limits.
+
+<span class="p">$</span> <span class="d">#  answered from the proposal log + live budgets, on Bedrock AgentCore</span>
+</div>
+  </div>
+</body></html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_style.css"></head>
+<body class="term">
+  <div class="win">
+    <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="name">bash &mdash; household-agent</span></div>
+    <div class="body"><span class="p">$</span> aws lambda invoke <span class="k">--function-name</span> household-agent-sweep \
+    <span class="k">--region</span> us-east-1 <span class="k">--payload</span> <span class="s">'{}'</span> /dev/stdout
+
+<span class="d">{</span>
+  <span class="c">"run_at"</span>: <span class="s">"2026-09-02T11:44:07Z"</span>,
+  <span class="c">"proposals_created"</span>: <span class="s">10</span>,
+  <span class="c">"categories_checked"</span>: [<span class="s">"wardrobe"</span>, <span class="s">"gifts"</span>, <span class="s">"groceries"</span>, <span class="s">"travel"</span>]
+<span class="d">}</span>
+
+<span class="p">$</span> <span class="d">#  10 proposals written to DynamoDB &middot; 10 approval emails sent via SES</span>
+</div>
+  </div>
+</body></html>

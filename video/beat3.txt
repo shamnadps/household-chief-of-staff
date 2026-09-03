@@ -1,9 +1,9 @@
 Every proposal is one email -- category, proposal, amount, reason, and two links: approve or reject.
 
-Open the wardrobe email and click approve. That hits API Gateway and a Lambda, which checks a per-transaction token, flips the transaction to executed in DynamoDB, and moves the wardrobe budget counter by exactly the approved amount. Nothing was bought -- this is a simulated execution model.
+Open Kai's wardrobe email and click approve. That hits API Gateway and a Lambda, which checks a per-transaction token, flips the transaction to executed in DynamoDB, and moves the wardrobe budget counter by exactly the approved amount. Nothing was bought -- this is a simulated execution model.
 
-Now reject the gift hamper instead -- one click. It flips to rejected, and the gifts budget stays untouched.
+Now reject the photo book instead -- one click. It flips to rejected, and the gifts budget stays untouched.
 
-Every proposal cleared a deterministic budget check before it was ever emailed. That is plain Python, not the model, deciding what fits. The model proposes; the code enforces.
+Every proposal cleared a deterministic budget check before it was ever emailed -- plain Python, not the model. The model proposes; the code enforces.
 
 And this is the whole system on one page: the approval queue by category, today's activity, what is trending toward qualifying next, and budget bars where the shaded overlay is what is pending -- so you can see whether approving everything queued would push a category over.

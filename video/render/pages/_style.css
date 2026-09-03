@@ -1,0 +1,33 @@
+html,body{margin:0;padding:0;height:100%;width:100%;overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',Helvetica,Arial,sans-serif;}
+
+/* ---- title cards ---- */
+body.title{background:linear-gradient(135deg,#0b1120 0%,#152238 55%,#0b1322 100%);
+  display:flex;align-items:center;justify-content:center;}
+.wrap{text-align:center;color:#f4f5fb;padding:0 6vw;}
+.t{font-size:5.2rem;font-weight:700;letter-spacing:-0.02em;margin:0;line-height:1.05;
+  background:linear-gradient(90deg,#7cc4ff,#b79bff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.sub{font-size:1.85rem;font-weight:400;color:#9fb0c9;margin-top:1.4rem;}
+.badge{margin-top:3rem;display:inline-flex;gap:0.9rem;flex-wrap:wrap;justify-content:center;}
+.pill{padding:0.5rem 1.3rem;border-radius:999px;background:rgba(124,196,255,0.12);
+  border:1px solid rgba(124,196,255,0.35);color:#7cc4ff;font-size:1.05rem;font-weight:500;}
+.cats{margin-top:2.6rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.cat{padding:0.7rem 1.5rem;border-radius:14px;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);color:#e2e4f3;font-size:1.15rem;font-weight:500;}
+.footer{margin-top:3.2rem;color:#6c7093;font-size:1.1rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+
+/* ---- terminal cards ---- */
+body.term{background:#0b1120;display:flex;align-items:center;justify-content:center;}
+.win{width:82vw;max-width:1500px;border-radius:12px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,0.5);border:1px solid #24304a;}
+.bar{background:#1b2536;height:38px;display:flex;align-items:center;padding:0 14px;gap:8px;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.r{background:#ff5f56;}.y{background:#ffbd2e;}.g{background:#27c93f;}
+.bar .name{color:#7f8aa3;font-size:0.9rem;margin-left:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+.body{background:#0d1526;padding:28px 30px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:1.15rem;line-height:1.65;color:#d7dced8;white-space:pre-wrap;}
+.body .p{color:#5fd08a;}
+.body .c{color:#9ecbff;}
+.body .k{color:#c7a8ff;}
+.body .s{color:#e8c07d;}
+.body .d{color:#7f8aa3;}
